@@ -1,4 +1,4 @@
-// bere dvojity odrazec mezi 70-45 cm vzdalenosti, kdyz je podlozen 3mm preklizky 
+// HC-SR04 catches double-reflector between 70-45 cm of distance, if is underlayed with cca 3mm thin material
 
 #include <Arduino.h>
 
@@ -8,19 +8,21 @@ int pTrig[8] = {13, 10, 11, 12, A0, A1, A2, A3};
 int pEcho[8] = {2, 3, 4, 5, 6, 7, 8, 9};
 long response[8]; 
 float distance[8];
+int min_first = 500; 
+int min_last = 500;
 
 void setup()  {
   Serial.begin(115200);
-  Serial.print("Ahoj");
+  Serial.print("Started");
   for (int i; i < 8; i++) {
     pinMode(pEcho[i], INPUT);
     pinMode(pTrig[i], OUTPUT);
   }
- }
+}
 
 void loop()
 {
-  
+  int min = min_frst;
   for (int i = 0; i < 8; i++)
   {
     digitalWrite(pTrig[i], LOW);
@@ -30,14 +32,18 @@ void loop()
     digitalWrite(pTrig[i], LOW);
     response[i] = pulseIn(pEcho[i], HIGH);
     distance[i] = response[i] / 58.31;
-    Serial.print(i);
+    if (distance[i] < min) 
+        min = distance[i];
+    // TOHLE V OSTRE VERZI PRYC ************************************
+    Serial.print(i);   // debug
     Serial.print(": ");
     Serial.print(distance[i]);
     Serial.print("; ");
-    delay(50); // if nebude, bude merit max. vzdalenost tak 130 cm, to by nemuselo tak vadit 
+    delay(50); // without this, it will measure max. distance cca 130 cm
   }
-  Serial.println();
-  delay(500);
-  Serial.print(millis());
+  min_last = min;
+  Serial.println(min_last);
+  delay(500);  // TOHLE V OSTRE VERZI PRYC ************************************
+  Serial.print(millis()); // TOHLE TAKY 
 }
 
